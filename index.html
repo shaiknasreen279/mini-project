@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyMind AI – Your Intelligent Study Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">S</div>
+      <span class="brand-name">StudyMind<span class="brand-ai">AI</span></span>
+    </div>
+
+    <nav class="modes">
+      <p class="modes-label">Study Modes</p>
+      <!-- Each button sets a different AI prompt mode -->
+      <button class="mode-btn active" data-mode="explain" onclick="setMode(this)">
+        <span class="mode-icon">💡</span> Explain Concepts
+      </button>
+      <button class="mode-btn" data-mode="quiz" onclick="setMode(this)">
+        <span class="mode-icon">🎯</span> Quiz Me
+      </button>
+      <button class="mode-btn" data-mode="summarize" onclick="setMode(this)">
+        <span class="mode-icon">📋</span> Summarize
+      </button>
+      <button class="mode-btn" data-mode="flashcard" onclick="setMode(this)">
+        <span class="mode-icon">🃏</span> Flashcards
+      </button>
+      <button class="mode-btn" data-mode="mindmap" onclick="setMode(this)">
+        <span class="mode-icon">🧠</span> Mind Map
+      </button>
+      <button class="mode-btn" data-mode="essay" onclick="setMode(this)">
+        <span class="mode-icon">✍️</span> Essay Help
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <!-- API key input – stored in localStorage -->
+      <label class="key-label">Anthropic API Key</label>
+      <div class="key-input-wrap">
+        <input
+          type="password"
+          id="apiKeyInput"
+          class="key-input"
+          placeholder="sk-ant-..."
+          oninput="saveKey()"
+        />
+        <span class="key-icon">🔑</span>
+      </div>
+      <p class="key-hint">Get your key at console.anthropic.com</p>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 id="modeTitle" class="topbar-title">Explain Concepts</h1>
+        <p id="modeDesc" class="topbar-desc">Ask me anything – I'll break it down clearly</p>
+      </div>
+      <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+    </header>
+
+    <!-- Quick-start suggestion chips -->
+    <div class="chips" id="chipsRow">
+      <button class="chip" onclick="fillPrompt('Explain photosynthesis like I\'m 15')">Explain photosynthesis</button>
+      <button class="chip" onclick="fillPrompt('What is the Pythagorean theorem and how is it used?')">Pythagorean theorem</button>
+      <button class="chip" onclick="fillPrompt('How does the human immune system work?')">Immune system</button>
+      <button class="chip" onclick="fillPrompt('What caused World War 1?')">WWI causes</button>
+    </div>
+
+    <!-- Chat messages container -->
+    <div class="chat-area" id="chatArea">
+      <!-- Welcome message (shown when empty) -->
+      <div class="welcome" id="welcomeMsg">
+        <div class="welcome-emoji">🎓</div>
+        <h2 class="welcome-title">Ready to Study?</h2>
+        <p class="welcome-sub">Choose a mode on the left, enter your API key, and start learning. Ask anything!</p>
+      </div>
+    </div>
+
+    <!-- Input area -->
+    <div class="input-area">
+      <div class="input-wrap">
+        <textarea
+          id="userInput"
+          class="user-input"
+          placeholder="Ask a question, paste text to summarize, or request a quiz…"
+          rows="1"
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+        ></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <p class="input-hint">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</p>
+    </div>
+
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
