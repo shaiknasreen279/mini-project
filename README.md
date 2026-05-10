@@ -64,13 +64,15 @@ npx serve .
 
 ---
 
-## 🔑 API Key Setup
+## 🔑 API Key Setup (Free — No Credit Card)
 
-1. Visit [console.anthropic.com](https://console.anthropic.com)
-2. Sign up / log in → go to **API Keys**
-3. Click **Create Key** and copy it
+1. Visit [aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+2. Sign in with your Google account
+3. Click **Create API Key** and copy it
 4. Paste it into the **sidebar input** in StudyMind AI
 5. Your key is saved automatically in your browser
+
+**Free tier limits:** 1,500 requests/day · 1 million tokens/day — more than enough for daily studying!
 
 ---
 
@@ -98,7 +100,7 @@ ai-study-assistant/
 | **HTML5** | Structure and layout |
 | **CSS3** | Styling, animations, responsive design |
 | **Vanilla JavaScript (ES6+)** | App logic, API calls, DOM manipulation |
-| **Anthropic Claude API** | AI responses (claude-sonnet-4) |
+| **Google Gemini API** | AI responses (gemini-2.0-flash, free tier) |
 | **Google Fonts** | Playfair Display + DM Sans typography |
 | **localStorage** | Persist API key between sessions |
 
