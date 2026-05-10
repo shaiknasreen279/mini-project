@@ -2,6 +2,9 @@
  * StudyMind AI – app.js
  * Handles: mode switching, API calls, markdown rendering,
  * chat history, API key persistence, auto-resize textarea.
+ *
+ * API: Google Gemini (gemini-2.0-flash) — free tier, 1500 req/day
+ * Get a free key at: https://aistudio.google.com/apikey
  */
 
 // ─── State ────────────────────────────────────────────────────────────────────
@@ -207,7 +210,7 @@ async function sendMessage() {
   // Validate inputs
   if (!text) return;
   if (!apiKey) {
-    showError('⚠️ Please enter your Anthropic API key in the sidebar first. Get one free at console.anthropic.com');
+    showError('⚠️ Please enter your free Gemini API key in the sidebar. Get one at aistudio.google.com/apikey — it\'s completely free!');
     return;
   }
 
@@ -229,21 +232,31 @@ async function sendMessage() {
   const typingId = showTyping();
 
   try {
-    // ── Call Anthropic API ──────────────────────────────────────────────────
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    // ── Call Google Gemini API ─────────────────────────────────────────────
+    // Model: gemini-2.0-flash — fast, free, 1500 requests/day
+    const GEMINI_URL =
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+    // Build Gemini-format contents array from chat history
+    // Gemini uses "user" / "model" roles (not "assistant")
+    const geminiContents = chatHistory.map(msg => ({
+      role:  msg.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: msg.content }]
+    }));
+
+    const response = await fetch(GEMINI_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type':      'application/json',
-        'x-api-key':         apiKey,
-        'anthropic-version': '2023-06-01',
-        // Note: Browser CORS requires a proxy in real production;
-        // for local dev this works when served from a local server
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model:      'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        system:     MODES[currentMode].system,
-        messages:   chatHistory   // send full history for context
+        // System instruction passed separately in Gemini API
+        system_instruction: {
+          parts: [{ text: MODES[currentMode].system }]
+        },
+        contents:           geminiContents,
+        generationConfig: {
+          maxOutputTokens: 1500,
+          temperature:     0.7
+        }
       })
     });
 
@@ -255,8 +268,10 @@ async function sendMessage() {
       throw new Error(errMsg);
     }
 
-    // Extract assistant reply
-    const reply = data.content?.[0]?.text || 'Sorry, I received an empty response.';
+    // Extract reply from Gemini response structure
+    const reply =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      'Sorry, I received an empty response.';
 
     // Remove typing indicator
     removeTyping(typingId);
@@ -271,14 +286,14 @@ async function sendMessage() {
   } catch (err) {
     removeTyping(typingId);
 
-    // User-friendly error messages
+    // User-friendly error messages for Gemini API
     let msg = err.message;
-    if (msg.includes('401') || msg.includes('authentication')) {
-      msg = 'Invalid API key. Please check your key and try again.';
-    } else if (msg.includes('429')) {
-      msg = 'Rate limit reached. Please wait a moment and try again.';
+    if (msg.includes('400') || msg.includes('API_KEY_INVALID') || msg.includes('invalid')) {
+      msg = 'Invalid API key. Get your free key at aistudio.google.com/apikey';
+    } else if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED')) {
+      msg = 'Rate limit reached (1500 free requests/day). Please wait a moment and try again.';
     } else if (msg.includes('Failed to fetch') || msg.includes('NetworkError')) {
-      msg = 'Network error. Make sure you\'re running this on a local server (not file://) and your internet is connected.';
+      msg = 'Network error. Check your internet connection and try again.';
     }
 
     showError('❌ ' + msg);
